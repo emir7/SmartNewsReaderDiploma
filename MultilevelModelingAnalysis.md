@@ -30,7 +30,7 @@ library('ggplot2')
 df <- read.csv('data.csv', header=TRUE)
 ```
 
-Večinivojsko modeliranje je predvsem primerno pri raziskavah, kjer lahko
+Večnivojsko modeliranje je predvsem primerno pri raziskavah, kjer lahko
 podatke grupiramo po določeni spremenljivki in gre za generalizacijo
 linearne regresije. Poznamo več vrst različnih modelov: <br />
 
@@ -41,13 +41,13 @@ vrednosti regresijskih premic spreminjajo. Ta model predpostavlja, da so
 koeficienti premic enaki. Z njim si lahko pomagamo pri računanju ICC oz.
 intraclass correlation koeficientu, ki pove ali je večnivojsko
 modeliranje potrebno (tipično vrednosti nad 0.05 nakazujejo, da je
-večnivojsko modeliranje potrebno).
+večnivojsko modeliranje primerno).
 
 #### Random slopes model
 
 Predstavlja modele, kjer se koeficienti lahko spreminjajo znotraj
 različnih grup oz. skupin. Ta model predpostavlja, da so začetne
-vrednosti enake.
+vrednosti premic enake.
 
 #### Random intercept and slopes model
 
@@ -106,14 +106,14 @@ xw - `xLargeCards` + `withImages`
 
 </ul>
 
-Gradnjo modelov bomo začeli pri manj kompleksnih modelih (z manj
-parametri) in postoma dodajali nove. Modele bomo skušali zgraditi tako,
-da bodo čim bolj jasno predstavljene smiselne interakcije. Modele bomo
+Gradnjo modelov bomo začeli pri manj kompleksnih modelih, ki imajo manj
+parametrov postoma pa bomo dodajali nove. Gradili bomo tako, da bodo čim
+bolj jasno predstavljene smiselne interakcije. Zgrajene modele bomo
 primerjali s pomočjo funkcije `anova`. Najboljši model bomo potem
 primerjali še z ostalimi (Random forest, Bayesov klasifikator,
 odločitveno drevo, AdaBoost).
 
-### Izgradnja večnivojskega modela (angl. Multilevel Modela)
+### Izgradnja večnivojskega modela
 
 Začeli bomo torej s t.i. `random intercept modelom`, ki nam bo povedal,
 ali je smiselno izvajati večnivojsko modeliranje. V našem primeru smo
@@ -122,7 +122,7 @@ opazili, da večnivojsko modeliranje je smiselno, saj vrednost ICC znaša
 večnivojskim modeliranjem, saj do 31% variance prihaja na podlagi
 izbire pogleda in prisotnosti slik (spremenljivka `str_lay_i`).
 
-Iz ispisa funkcije `summary` lahko sklepamo, da povprečna vrednost ocen
+Iz izpisa funkcije `summary` lahko sklepamo, da povprečna vrednost ocen
 pogledov znaša 1.4349 (vrednost spremenljivke `(Intercept)`).
 
 Na podlagi izpisa funkcije `coefficients` pa opazimo, da imajo pogledi s
@@ -132,15 +132,15 @@ spletnih straneh redko beremo novice brez slik, saj te dodajo estetsko
 vrednost aplikaciji hkrati pa lahko več povejo o novici kot zgolj le
 besedilo in so v splošnem ljudem bolj zanimive od samega besedila.
 
-Prav tako opazimo negativne vrednosti pri vrednosti `xn` (`xLargeCards +
-noImages`), saj tak način prikaza ni standarden. Po aplikaciji
-navigiramo s premiki levo-desno in ne z navigacijo gor-dol. Na zaslonu
-lahko vidimo torej le eno novico, saj se uporabnik lahko tako lažje
-osredotoči na samo novico. V primeru ko slik torej ni, je na zaslonu
-podanih premalo informacij (le besedilo). Tako si lahko razložimo, zakaj
-ima prikaz `largeCards` višje ocene od prikaza `xLargeCards`, ko slik
-ni, saj ima uporabnik na voljo več informacij, ker je prikazanih več
-novic hkrati.
+Prav tako opazimo negativne vrednosti pri spremenljivki `xn`
+(`xLargeCards + noImages`), saj tak način prikaza ni standarden. Po
+aplikaciji navigiramo s premiki levo-desno in ne z navigacijo gor-dol.
+Na zaslonu lahko vidimo torej le eno novico, saj se uporabnik lahko tako
+lažje osredotoči na samo novico. V primeru ko slik torej ni, je na
+zaslonu podanih premalo informacij (le besedilo). Tako si lahko
+razložimo, zakaj ima prikaz `largeCards` višje ocene od prikaza
+`xLargeCards`, ko slik ni, saj ima uporabnik na voljo več informacij,
+ker je prikazanih več novic hkrati.
 
 Vrednost 0.003151307 pri spremenljivki `gw` (`gridView + withImages`)
 prav tako ni presenetljiva, saj uporabniku ponuja premalo informacij na
@@ -192,7 +192,7 @@ coefficients(null.model)
 
 V nadaljevanju si bomo pogledali, kako posamezne spremenljivke na prvem
 nivoju vplivajo na končno oceno uporabnika. Nato bomo poskušali dodajati
-korelacije med spremenljivkami
+interakcije med spremenljivkami
 
 #### Vpliv spremenljivke `user.activity`
 
@@ -269,7 +269,7 @@ vrednost ni veliko manjša koeficient znaša namreč le -1.0398. V
 nadaljevanju bomo skušali ugotoviti ali morda fizična aktivnost
 uporabnika vpliva na izbiro pisave (ko uporabnik hodi je smiselno imeti
 večjo pisavo medtem ko je pri miru pa ima lahko tudi manjšo, saj se
-lahko lažje osredotoči na aplikacijo).
+lahko tako lažje osredotoči na aplikacijo).
 
 ``` r
 font_size.model <- lmer(score ~ 1 + font.size + (1|str_lay_i), data=df)
@@ -322,16 +322,16 @@ summary(font_size.model)
 
 #### Vpliv spremenljivke `internet.speed`
 
-V splošnem spremenljivka `internet.speed` na podlagi večnivojskega
-modela lahko sklepamo, da ima vpliv. Vrednost ocene uporabnika naj bi
-padala, ko hitrost internetne povezave raste, vendar si to težko
-razložimo. Potrebno je omeniti tudi, da je zelo malo takih vnosov, kjer
-je hitrost internetne povezave enaka 0 (le 45). Prav tako pa je
-problematično pridobiti več vnosov, ko ima uporabnik zelo počasno
+Za spremenljivko `internet.speed` lahko sklepamo, da ima vpliv (na
+podlagi modela `internet_speed_effect`). Vrednost ocene uporabnika naj
+bi padala, ko hitrost internetne povezave raste, vendar si težko
+razložimo zakaj. Potrebno je omeniti tudi, da je zelo malo takih
+vnosov, kjer je hitrost internetne povezave enaka 0 (le 45). Prav tako
+pa je problematično pridobiti več vnosov, ko ima uporabnik zelo počasno
 internetno povezavo, saj danes to ni več problem. V nadaljavanju bomo
 pri proučevanju vpliva spremenljivk na končno oceno uporabnika izpustili
 spremenljivko
-`internet.speed`.\`
+`internet.speed`.
 
 ``` r
 internet_speed_effect <- lmer(score ~ 1 + internet.speed + (1|str_lay_i), data=df)
@@ -428,21 +428,22 @@ summary(theme_effect)
 #### Vpliv spremenljivke `time.of.day`
 
 Spodnji model nam pove, da so uporabnikove ocene manjše ob bolj poznih
-urah, saj vrednost koeficienta `time.of.day` negativna in znaša
+urah, saj je vrednost koeficienta `time.of.day` negativna in znaša
 -0.07844. Razlog za padec ocene bolj kot je pozna ura je lahko ta, da so
 uporabniki vedno bolj utrujeni in zato dajejo slabše ocene, saj si težje
 prilagodijo izgled aplikacije.
 
-Eden izmed izmed parametrov, ki bi lahko vplival na uro je tema
-aplikacije. Sklepali bi lahko, da je svetlost okolice nižja, bolj kot je
-pozno. Poslednično pri nižji svetlosti okolice je temna tema aplikacije
+Eden izmed parametrov, ki bi lahko vplival na uro je tema aplikacije.
+Sklepali bi lahko, da je svetlost okolice nižja, bolj kot je pozno.
+Poslednično pri nižji svetlosti okolice je temna tema aplikacije
 primernejša. Povezavo med uro in temo aplikacije bomo proučevali v
-razdelku `Vpliv spremenljivke theme in time.of.day v kombinaciji`.
+razdelku `Kombinacija vpliva spremenljivk theme in time.of.day`.
 
 Prav tako bi bilo zanimivo proučiti povezavo med uro in velikostjo
 pisave. Morda bi se lahko izkazalo, da je ob poznejših urah večja pisava
 boljša, saj so uporabniki bolj utrujeni. Povezavo bomo raziskali v
-razdelku
+razdelku `Kombinacija vpliva spremenljivk font.size in
+time.of.day`.
 
 ``` r
 time_of_day_effect <- lmer(score ~ 1 + time.of.day + (1|str_lay_i), data=df)
@@ -502,15 +503,15 @@ višja (vrednost koeficienta `env.brightnessL2` znaša le 0.6476), dajejo
 uporabniki nekoliko boljše ocene, kar je skoraj zanemarljivo. Potem pa
 se ocene razlikujejo za višje faktorje (vrednost spremenljivke
 `env.brightnessL3` znaša -1.2248 pri spremenljivki `env.brightnessL4` pa
--2.4363), kar pomeni, da ko je svetlost okolice višja uporabniki, dajejo
+-2.4363), kar pomeni, da ko je svetlost okolice višja, uporabniki dajejo
 prikazom slabše ocene.
 
 V povezavi s svetlostjo okolice, bi bilo najbolje proučiti vpliv
 spremenljivke `theme`. Sklepali bi namreč lahko, da pri višji svetlosti
 okolice svetla tema aplikacije prevladuje medtem ko pri nižji temna
-tema, kar bomo v razdelku `Vpliv spremenljivke theme in time.of.day v
-kombinaciji` tudi
-storili.
+tema, kar bomo preverili v razdelku `Kombinacija vpliva spremenljivk
+theme in
+env.brightness`.
 
 ``` r
 env_brightness_effect <- lmer(score ~ 1 + env.brightness + (1|str_lay_i), data=df)
@@ -574,8 +575,8 @@ Iz spodnjega modela lahko razberemo, da uporabniki dajejo slabše ocene
 višji kot je nivo baterije. Vrednost koeficienta `battery.level` je
 negativna in znaša `-0.051929`.
 
-V razdelku `Vpliv spremenljivke theme in battery.level v kombinaciji`
-bomo podroneje proučili, kako nivo baterije vpliva na temo aplikacije. V
+V razdelku `Kombinacija vpliva spremenljivk theme in battery.level` bomo
+podrobneje proučili, kako nivo baterije vpliva na temo aplikacije. V
 praksi se namreč izkaže, da lahko z uporabo temne barve oz. temne teme
 aplikacije porabimo manj
 baterije.
@@ -689,7 +690,7 @@ summary(screen_brightness_effect)
     ##             (Intr)
     ## scrn.brghtn -0.250
 
-#### Vpliv spremenljivke `theme` in `time.of.day` v kombinaciji
+#### Kombinacija vpliva spremenljivk `theme` in `time.of.day`
 
 Kot smo omenili si bomo na tem mestu pogledali ali obstaja povezava med
 temo aplikacije in uro. Iz spodnjih dveh modelov lahko ugotovimo, da
@@ -763,7 +764,7 @@ summary(time_of_day_theme_no_inter)
     ## thmlght-thm -0.067       
     ## time.of.day -0.261 -0.166
 
-#### Vpliv spremenljivke `theme` in `env.brightness` v kombinaciji
+#### Kombinacija vpliva spremenljivk `theme` in `env.brightness`
 
 Na podlagi spodnjih dveh modelov in klica funkcije anova lahko sklepamo,
 da moramo upoštevati interakcijo med temo aplikacijo in svetlostjo
@@ -771,8 +772,8 @@ okolice. Vrednosti `AIC` in `BIC` so manjše pri modelu, ki interakcije
 med omenjenima spremenljivkama upošteva. Prav tako pa p-vrednost, ki
 znaša 4.1e-14, nakazuje na statistično relevantno razliko med modeloma.
 
-Če podrobneje analiziramo torej model, ki interakcije upoštevamo,
-pridemo do naslednjih sklepov:
+Če podrobneje analiziramo torej model, ki interakcije upošteva, pridemo
+do naslednjih sklepov:
 
 <ul>
 
@@ -804,9 +805,9 @@ vrednosti koeficientov `themelight-theme:env.brightnessL3` in
 
 </ul>
 
-Glavna ugotovitev, je torej, da temna tema aplikacije pridobiva boljše
-ocene, ko je svetlost okolice nižja, medtem ko priljubljenost svetle
-teme aplikacije raste, ko raste tudi svetlost
+Glavna ugotovitev je, da temna tema aplikacije pridobiva boljše ocene,
+ko je svetlost okolice nižja, medtem ko priljubljenost svetle teme
+aplikacije raste, ko raste tudi svetlost
 okolice.
 
 ``` r
@@ -883,7 +884,7 @@ summary(env_brightness_theme_with_inter)
     ## thmlgh-:.L3  0.092 -0.526 -0.099 -0.686 -0.220  0.196       
     ## thmlgh-:.L4  0.121 -0.696 -0.135 -0.210 -0.671  0.268  0.366
 
-#### Vpliv spremenljivke `theme` in `battery.level` v kombinaciji
+#### Kombinacija vpliva spremenljivk `theme` in `battery.level`
 
 Iz spodnjih dveh modelov lahko sklepamo, da je potrebno upoštevati
 interakcijo med temo aplikacije in nivojem baterije. Model, ki jih
@@ -922,8 +923,8 @@ boljše ocene pogledi, ki imajo nastavljeno svetlo temo aplikacije.
 
 </ul>
 
-To pomeni, da do enačb premic, ki napovedujejo oceno uporabnika pridemo
-na sledeč način:
+To pomeni, da so enačbe premic, ki napovedujejo oceno uporabnika
+pridobljene na sledeč način:
 
 <ul>
 
@@ -952,7 +953,7 @@ dobivati boljše ocene, ko ima uporabnik približno več kot 30% baterije,
 kar je razvideno tudi iz spodnjih grafov.
 
 Končni sklep je torej, da moramo upoštevati interakcije med nivojem
-baterije in teme aplikacije, saj tako model boljše napoveduje končne
+baterije in temo aplikacije, saj tako model boljše napoveduje končne
 ocene uporabnika. Temna tema aplikacije je boljša, ko je nivo baterije
 nižji, saj tako lahko uporabniki podaljšajo življensko dobo baterije. Z
 višjim nivojem baterije (približno nad 30%) pa postane svetlejša tema
@@ -1033,12 +1034,12 @@ summary(battery_level_theme_with_inter)
 
 ![](MultilevelModelingAnalysis_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
-#### Vpliv spremenljivke `font.size` in `time.of.day` v kombinaciji
+#### Kombinacija vpliva spremenljivk `font.size` in `time.of.day`
 
 Na podlagi spodnjih modelov lahko sklepamo, da nam ni potrebno
-upoštevati interakcije met velikostjo pisavo in ure. Model, ki
+upoštevati interakcije med velikostjo pisave in uro. Model, ki
 omenjenih interakcij ne upošteva ima višje `AIC` in `BIC` vrednosti.
-Prav tako pa nam `anova` analiza modelov tudi pove, da ni statistično
+Prav tako pa nam `anova` analiza modelov pove, da ni statistično
 relevantne razlike med modeloma.
 
 Če analiziramo boljši model, lahko sklepamo:
@@ -1116,21 +1117,19 @@ summary(font_size_time_of_day_no_inter)
     ## fnt.szsmll- -0.131       
     ## time.of.day -0.281 -0.044
 
-#### Vpliv spremenljivke `font.size` in `user.activity` v kombinaciji
+#### Kombinacija vpliva spremenljivk `font.size` in `user.activity`
 
 Bolj kot ura vpliva na velikost pisave fizična aktivnost uporabnika, kar
 nam pove klic funkcije
-`anova(font_size_time_of_day_no_inter,font_size_user_activity_font_size_with_inter)`.
+`anova(font_size_time_of_day_no_inter,font_size_user_activity_with_inter)`.
 Prav tako pa na podlagi klica funkcije
-`font_size_user_activity_font_size_with_inter <- lmer(score ~ 1 +
-user.activity*font.size + (1|str_lay_i), data=df)` lahko ugotovimo, da
-moramo upoštevati interakcijo med velikostjo pisave in fizično
-aktivnostjo uporabnika, saj tako lahko boljše napovedujemo uporabniško
-oceno.
+`anova(font_size_user_activity_no_inter,
+font_size_user_activity_with_inter)` lahko ugotovimo, da moramo
+upoštevati interakcijo med velikostjo pisave in fizično aktivnostjo
+uporabnika, saj tako lahko boljše napovedujemo uporabniško oceno.
 
 Torej če si podrobneje pogledamo model
-`font_size_user_activity_font_size_with_inter` lahko pridemo do sledečih
-sklepov:
+`font_size_user_activity_with_inter` lahko pridemo do sledečih sklepov:
 
 <ul>
 
@@ -1144,8 +1143,8 @@ potem rastejo, ko uporabnik hodi ali pa je pri miru.
 <li>
 
 V splošnem je prav tako večja pisava bolj priljubljena, saj je vrednost
-koeficienta `font.sizesmall-font` negativna in znaša -0.06605 ter blizu
-nič, saj njegova p-vrednost znaša 0.904112.
+koeficienta `font.sizesmall-font` negativna in znaša -0.06605, kar je
+blizu nič, saj njegova p-vrednost znaša 0.904112.
 
 </li>
 
@@ -1160,47 +1159,47 @@ hodi. Takrat ima manjša pisava manjše vrednosti za faktor, ki znaša kar
 
 <li>
 
-Med vožnjo pa ne obsajajo statistično relevantne razlike med pisavama,
-saj p-vrednost koeficienta `user.activitySTILL:font.sizesmall-font`
-znaša 0.544209.
+Ko je uporabnik pri miru pa ne obsajajo statistično relevantne razlike
+med pisavama, saj p-vrednost koeficienta
+`user.activitySTILL:font.sizesmall-font` znaša 0.544209.
 
 </li>
 
 </ul>
 
 Na podlagi spodnjega modela, torej lahko ugotovimo ponovno, da so
-uporabniki dajali najslabše ocene med vožnjo in boljše ocene ko so
-hodili in najboljše ko so bili pri miru. V splošnem je velika pisava
-nekoliko bolj priljubljena, a je to zanemarljivo malo. Potrebno pa je
-izbrati ustrezno pisavo, ko uporabnik hodi, saj se na tem mestu izkažejo
-največje razlike med veliko in majhno pisavo. Med hojo je uporabnikom
-namreč bolje, če imajo večjo pisavo, saj se tako lahko lažje
+uporabniki dajali najslabše ocene med vožnjo in boljše ocene, ko so
+hodili in najboljše, ko so bili pri miru. V splošnem je velika pisava
+nekoliko bolj priljubljena, a je to skoraj da zanemarljivo Potrebno pa
+je izbrati ustrezno pisavo, ko uporabnik hodi, saj se na tem mestu
+izkažejo največje razlike med veliko in majhno pisavo. Med hojo je
+uporabnikom namreč bolje, če imajo večjo pisavo, saj se tako lahko lažje
 osredotočijo na branje
 novic.
 
 ``` r
-font_size_user_activity_font_size_no_inter <- lmer(score ~ 1 + user.activity + font.size + (1|str_lay_i), data=df)
-font_size_user_activity_font_size_with_inter <- lmer(score ~ 1 + user.activity*font.size + (1|str_lay_i), data=df)
-anova(font_size_user_activity_font_size_no_inter, font_size_user_activity_font_size_with_inter)
+font_size_user_activity_no_inter <- lmer(score ~ 1 + user.activity + font.size + (1|str_lay_i), data=df)
+font_size_user_activity_with_inter <- lmer(score ~ 1 + user.activity*font.size + (1|str_lay_i), data=df)
+anova(font_size_user_activity_no_inter, font_size_user_activity_with_inter)
 ```
 
     ## refitting model(s) with ML (instead of REML)
 
     ## Data: df
     ## Models:
-    ## font_size_user_activity_font_size_no_inter: score ~ 1 + user.activity + font.size + (1 | str_lay_i)
-    ## font_size_user_activity_font_size_with_inter: score ~ 1 + user.activity * font.size + (1 | str_lay_i)
-    ##                                              npar    AIC    BIC  logLik
-    ## font_size_user_activity_font_size_no_inter      6 4237.3 4265.7 -2112.6
-    ## font_size_user_activity_font_size_with_inter    8 4224.1 4261.9 -2104.0
-    ##                                              deviance  Chisq Df Pr(>Chisq)    
-    ## font_size_user_activity_font_size_no_inter     4225.3                         
-    ## font_size_user_activity_font_size_with_inter   4208.1 17.217  2  0.0001826 ***
+    ## font_size_user_activity_no_inter: score ~ 1 + user.activity + font.size + (1 | str_lay_i)
+    ## font_size_user_activity_with_inter: score ~ 1 + user.activity * font.size + (1 | str_lay_i)
+    ##                                    npar    AIC    BIC  logLik deviance  Chisq
+    ## font_size_user_activity_no_inter      6 4237.3 4265.7 -2112.6   4225.3       
+    ## font_size_user_activity_with_inter    8 4224.1 4261.9 -2104.0   4208.1 17.217
+    ##                                    Df Pr(>Chisq)    
+    ## font_size_user_activity_no_inter                    
+    ## font_size_user_activity_with_inter  2  0.0001826 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 ``` r
-anova(font_size_time_of_day_no_inter,font_size_user_activity_font_size_with_inter)
+anova(font_size_time_of_day_no_inter,font_size_user_activity_with_inter)
 ```
 
     ## refitting model(s) with ML (instead of REML)
@@ -1208,18 +1207,18 @@ anova(font_size_time_of_day_no_inter,font_size_user_activity_font_size_with_inte
     ## Data: df
     ## Models:
     ## font_size_time_of_day_no_inter: score ~ 1 + font.size + time.of.day + (1 | str_lay_i)
-    ## font_size_user_activity_font_size_with_inter: score ~ 1 + user.activity * font.size + (1 | str_lay_i)
-    ##                                              npar    AIC    BIC  logLik
-    ## font_size_time_of_day_no_inter                  5 4480.6 4504.2 -2235.3
-    ## font_size_user_activity_font_size_with_inter    8 4224.1 4261.9 -2104.0
-    ##                                              deviance Chisq Df Pr(>Chisq)    
-    ## font_size_time_of_day_no_inter                 4470.6                        
-    ## font_size_user_activity_font_size_with_inter   4208.1 262.5  3  < 2.2e-16 ***
+    ## font_size_user_activity_with_inter: score ~ 1 + user.activity * font.size + (1 | str_lay_i)
+    ##                                    npar    AIC    BIC  logLik deviance Chisq Df
+    ## font_size_time_of_day_no_inter        5 4480.6 4504.2 -2235.3   4470.6         
+    ## font_size_user_activity_with_inter    8 4224.1 4261.9 -2104.0   4208.1 262.5  3
+    ##                                    Pr(>Chisq)    
+    ## font_size_time_of_day_no_inter                   
+    ## font_size_user_activity_with_inter  < 2.2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 ``` r
-summary(font_size_user_activity_font_size_with_inter)
+summary(font_size_user_activity_with_inter)
 ```
 
     ## Linear mixed model fit by REML. t-tests use Satterthwaite's method [
@@ -1277,7 +1276,7 @@ izgradnji modelov:
 V splošnem, ko se spreminja uporabniška aktivnost, se spreminjajo tudi
 njegove ocene. Uporabniki so namreč najslabše ocene dajali med vožnjo.
 Nekoliko boljše ocene so dajali med hojo in najboljše, ko so bili pri
-miru. V kombinaciji s fizično aktivnostjo je na končno oceno je predvsem
+miru. V kombinaciji s fizično aktivnostjo je na končno oceno predvsem
 vplivala velikost pisave, kar se najbolj odraža med hojo, saj je imela
 manjša pisava takrat veliko bolj negativne vrednosti kot večja.
 
@@ -1327,7 +1326,7 @@ V splošnem je velika pisava bolj priljubljena kot manjša.
 
 </ul>
 
-V nadaljevanju bomo postoma dodajali v končni model vse pomembnejše
+V nadaljevanju bomo postopoma dodajali v končni model vse pomembnejše
 interakcije. Če bomo ob upoštevanju določene spremenljivke dosegali
 slabše rezultate, jih bomo izpustili. Pri tem si bomo pomagali s klicem
 funkcije `anova`. Končni model bomo analizirali in si pogledali njegovo
@@ -1360,7 +1359,7 @@ anova(final.model.1, final.model.2) # vidimo, da nivo baterije moramo upoštevat
 
 ``` r
 final.model.3 <- lmer(score ~ 1 + user.activity*font.size + theme*env.brightness + theme*battery.level + (1|str_lay_i), data=df)
-anova(final.model.2, final.model.3) # vidimo, da interakcijo mioramo upoštevati (vrednost AIC manjša), vendar ta ni več tako močna
+anova(final.model.2, final.model.3) # vidimo, da interakcijo moramo upoštevati (vrednost AIC manjša), vendar ta ni več tako močna
 ```
 
     ## refitting model(s) with ML (instead of REML)
@@ -1404,7 +1403,7 @@ Na podlagi spodnjega modela lahko pridemo do sledečih sklepov:
 
 <li>
 
-Še vedno velja dejstvo, da uporabniki dajejo slabše ocene med vožnje,
+Še vedno velja dejstvo, da uporabniki dajejo slabše ocene med vožnjo,
 nekoliko boljše, ko hodijo in najboljše, ko so pri miru.
 
 </li>
@@ -1412,7 +1411,7 @@ nekoliko boljše, ko hodijo in najboljše, ko so pri miru.
 <li>
 
 Manjša pisava v aplikaciji je manj priljubljena kot velika, saj je
-vrednost keficienta `font.sizesmall-font` negativna in blizu nič, kar
+vrednost koeficienta `font.sizesmall-font` negativna in blizu nič, kar
 lahko sklepamo na podlagi p-vrednosti, ki znaša 0.840859.
 
 </li>
@@ -1421,24 +1420,44 @@ lahko sklepamo na podlagi p-vrednosti, ki znaša 0.840859.
 
 Svetla tema aplikacije je načeloma nekoliko slabša, a je tudi ta
 vrednost zelo majhna in blizu nič, kar lahko sklepamo na podlagi
-p-vrednosti koeficienta `themelight-theme`.
+p-vrednosti koeficienta `themelight-theme`. Ne smemo pa zanemariti
+interakcij med temo aplikacije in svetlostjo okolice. Izkaže se namreč,
+da se z višanjem svetlosti okolice veča tudi priljubljenost svetle teme
+aplikacije, kar lahko sklepamo na podlagi vrednosti koeficientov
+`themelight-theme:env.brightnessL3` in
+`themelight-theme:env.brightnessL4`.
 
 </li>
 
 <li>
 
-V splošnem dajejo uporabniki slabše ocene, ko se svetlost okolice viša,
-kar vidimo na podlagi negativnih vrednosti koeficientov
-`env.brightnessL2`, `env.brightnessL3` in `env.brightnessL2. </li> <li>V
-splošnem velja, da z višanjem nivoja baterije ocene uporabnikov padajo
-(negativna vrednostr koeficienta`battery.level`).</li> <li>Ko uporabnik
-hodi, dobiva majhna pisava veliko slabše rezultate kot večja, vrednost
-koeficienta`user.activityON\_FOOT:font.sizesmall-font`je negativna in
-znaša kar -1.901058. Med vožnjo in ko so uporabniki pri miru pa velikih
-razlik med majhno in veliko pisavo ni.</li> <li>Z višanjem nivoja
-baterije pa svetla tema aplikacije pridobiva boljše rezultate, kar lahko
-sklepamo na podlagi vrednosti
-koeficienta`themelight-theme:battery.level\`, ki je
+V splošnem dajejo uporabniki slabše ocene, ko se svetlost okolice višja,
+kar vidimo na podlagi negativnih vrednosti koeficientov,
+`env.brightnessL3` in `env.brightnessL4`.
+
+</li>
+
+<li>
+
+V splošnem velja, da z višanjem nivoja baterije ocene uporabnikov padajo
+(negativna vrednost koeficienta `battery.level`).
+
+</li>
+
+<li>
+
+Ko uporabnik hodi, dobiva majhna pisava veliko slabše rezultate kot
+večja, vrednost koeficienta `user.activityON_FOOT:font.sizesmall-font`
+je negativna in znaša kar -1.901058. Med vožnjo in ko so uporabniki pri
+miru pa velikih razlik med majhno in veliko pisavo ni.
+
+</li>
+
+<li>
+
+Z višanjem nivoja baterije pa svetla tema aplikacije pridobiva boljše
+rezultate, kar lahko sklepamo na podlagi vrednosti koeficienta
+`themelight-theme:battery.level`, ki je
     pozitiven.
 
 </li>
@@ -1563,8 +1582,8 @@ kFold <- function(k){
 }
 ```
 
-Na podlagi spodnjega klica lahko razberemo, da ima MULTILEVEL model 9%
-večjo natančnost pri napovedovanju uporabnikove ocene kot večinski
+Na podlagi spodnjega klica lahko razberemo, da ima večnivojski model za
+9% večjo natančnost pri napovedovanju uporabnikove ocene kot večinski
 klasifikator.
 
 ``` r
@@ -1644,10 +1663,10 @@ evaluateModel <- function(){
 }
 ```
 
-Iz spodnjega izpisa lahko ugotovimo, da je novo zgrajen model boljši,
+Iz spodnjega izpisa lahko ugotovimo, da je novozgrajen model boljši,
 vendar je problem, da velikokrat napove negativen razred, čeprav je ta
 bil pozitiven (vrednost `recall` manjša). Izkaže pa se, da se modelu
-poveča natančnost (`accuracy` znaša 0.75). Prav tako pa model redkeje
+poveča natančnost (`accuracy` znaša 0.77). Prav tako pa model redkeje
 zgreši negativen razred, ko napove pozitiven izhod (mera `precision` je
 večja).
 
@@ -1655,7 +1674,7 @@ V splošnem želimo maksimizirati obe vrednosti (`precision` in `recall`),
 zato uporabimo mero `f-measure`. V našem primeru vidimo, da smo dosegli
 manjši napredek, saj vrednost `f-measure` znaša 0.807882 medtem ko pri
 večinskem klasifikatorju 0.794224. To pomeni, da smo dosegli nekoliko
-boljše razberje med vrednostima `recall` in `precision` v primerjavi z
+boljše razmerje med vrednostima `recall` in `precision` v primerjavi z
 večinskim klasifikatorjem.
 
 ``` r
