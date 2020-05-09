@@ -39,7 +39,7 @@ linearne regresije. Poznamo več vrst različnih modelov: <br />
 Predstavlja modele, kjer dovolimo, da se intercepti oz. začetne
 vrednosti regresijskih premic spreminjajo. Ta model predpostavlja, da so
 koeficienti premic enaki. Z njim si lahko pomagamo pri računanju ICC oz.
-intraclass correlation koeficientu, ki pove ali je večnivojsko
+intraclass correlation koeficienta, ki pove ali je večnivojsko
 modeliranje potrebno (tipično vrednosti nad 0.05 nakazujejo, da je
 večnivojsko modeliranje primerno).
 
@@ -148,6 +148,13 @@ zaslonu, ker ima na voljo le slike s kratkim besedilom o novici. To
 lahko sklepamo na podlagi tega, da vrednost `mw` (`miniCards +
 withImages`) ima v povprečju višje ocene.
 
+![gridView With Images](./screenshots/gw.jpg) ![largeCards No
+Images](./screenshots/ln.jpg) ![largeCards With
+Images](./screenshots/lw.jpg) ![miniCards With
+Images](./screenshots/mw.jpg) ![xLargeCards With
+Images](./screenshots/xw.jpg) ![xLargeCards No
+Images](./screenshots/xn.jpg)
+
 ``` r
 null.model <- lmer(score ~ 1 + (1|str_lay_i), data=df)
 summary(null.model)
@@ -189,6 +196,9 @@ coefficients(null.model)
     ## 
     ## attr(,"class")
     ## [1] "coef.mer"
+
+Na podlagi zgornje analize lahko sklepamo, da so v splošnem uporabnikom
+bolj všeč pogledi s slikami kot tisti brez.
 
 V nadaljevanju si bomo pogledali, kako posamezne spremenljivke na prvem
 nivoju vplivajo na končno oceno uporabnika. Nato bomo poskušali dodajati
@@ -1324,6 +1334,12 @@ V splošnem je velika pisava bolj priljubljena kot manjša.
 
 </li>
 
+<li>
+
+V splošnem so uporabnikom bolj všeč pogledi s slikami kot tisti brez.
+
+</li>
+
 </ul>
 
 V nadaljevanju bomo postopoma dodajali v končni model vse pomembnejše
@@ -1412,7 +1428,8 @@ nekoliko boljše, ko hodijo in najboljše, ko so pri miru.
 
 Manjša pisava v aplikaciji je manj priljubljena kot velika, saj je
 vrednost koeficienta `font.sizesmall-font` negativna in blizu nič, kar
-lahko sklepamo na podlagi p-vrednosti, ki znaša 0.840859.
+lahko sklepamo na podlagi p-vrednosti, ki znaša 0.840859. Največje
+razlike se pokažejo, ko upoštevamo fizično aktivnost uporabnika.
 
 </li>
 
@@ -1431,16 +1448,18 @@ aplikacije, kar lahko sklepamo na podlagi vrednosti koeficientov
 
 <li>
 
-V splošnem dajejo uporabniki slabše ocene, ko se svetlost okolice višja,
+V splošnem dajejo uporabniki slabše ocene, ko je svetlost okolice višja,
 kar vidimo na podlagi negativnih vrednosti koeficientov,
-`env.brightnessL3` in `env.brightnessL4`.
+`env.brightnessL3` in `env.brightnessL4`, a je to odvisno od izbire teme
+aplikacije.
 
 </li>
 
 <li>
 
 V splošnem velja, da z višanjem nivoja baterije ocene uporabnikov padajo
-(negativna vrednost koeficienta `battery.level`).
+(negativna vrednost koeficienta `battery.level`), vendar pri temu ne
+smemo pozabiti na izbiro teme v aplikaciji.
 
 </li>
 

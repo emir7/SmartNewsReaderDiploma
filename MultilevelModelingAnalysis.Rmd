@@ -19,7 +19,7 @@ df <- read.csv('data.csv', header=TRUE)
 Večnivojsko modeliranje je predvsem primerno pri raziskavah, kjer lahko podatke grupiramo po določeni spremenljivki in gre za generalizacijo linearne regresije. Poznamo več vrst različnih modelov: <br />
 
 #### Random intercept model
-Predstavlja modele, kjer dovolimo, da se intercepti oz. začetne vrednosti regresijskih premic spreminjajo. Ta model predpostavlja, da so koeficienti premic enaki. Z njim si lahko pomagamo pri računanju ICC oz. intraclass correlation koeficientu, ki pove ali je večnivojsko modeliranje potrebno (tipično vrednosti nad 0.05 nakazujejo, da je večnivojsko modeliranje primerno).
+Predstavlja modele, kjer dovolimo, da se intercepti oz. začetne vrednosti regresijskih premic spreminjajo. Ta model predpostavlja, da so koeficienti premic enaki. Z njim si lahko pomagamo pri računanju ICC oz. intraclass correlation koeficienta, ki pove ali je večnivojsko modeliranje potrebno (tipično vrednosti nad 0.05 nakazujejo, da je večnivojsko modeliranje primerno).
 
 #### Random slopes model
 Predstavlja modele, kjer se koeficienti lahko spreminjajo znotraj različnih grup oz. skupin. Ta model predpostavlja, da so začetne vrednosti premic enake.
@@ -54,12 +54,20 @@ Prav tako opazimo negativne vrednosti pri spremenljivki `xn` (`xLargeCards + noI
 
 Vrednost 0.003151307 pri spremenljivki `gw` (`gridView + withImages`) prav tako ni presenetljiva, saj uporabniku ponuja premalo informacij na zaslonu, ker ima na voljo le slike s kratkim besedilom o novici. To lahko sklepamo na podlagi tega, da vrednost `mw` (`miniCards + withImages`) ima v povprečju višje ocene.
 
+![gridView With Images](./screenshots/gw.jpg)
+![largeCards No Images](./screenshots/ln.jpg)
+![largeCards With Images](./screenshots/lw.jpg)
+![miniCards With Images](./screenshots/mw.jpg)
+![xLargeCards With Images](./screenshots/xw.jpg)
+![xLargeCards No Images](./screenshots/xn.jpg)
+
 ```{r}
 null.model <- lmer(score ~ 1 + (1|str_lay_i), data=df)
 summary(null.model)
 coefficients(null.model)
 ```
-
+Na podlagi zgornje analize lahko sklepamo, da so v splošnem uporabnikom bolj všeč pogledi s slikami kot tisti brez.
+  
 V nadaljevanju si bomo pogledali, kako posamezne spremenljivke na prvem nivoju vplivajo na končno oceno uporabnika. Nato bomo poskušali dodajati interakcije med spremenljivkami
 
 #### Vpliv spremenljivke `user.activity`
@@ -261,6 +269,7 @@ Do sedaj smo prišli do sledečih sklepov, ki jih bomo upoštevali pri izgradnji
   <li>Načeloma pri višji hitrosti internetne povezave dajejo uporabniki slabše rezultate, vendar je potrebno omeniti, da je zelo malo takih vnosov, kjer je moč interneta slaba. Prav tako pa je problematično zbirati take vnose, saj uporabniki večinoma nimajo problemov s hitrostjo interneta.</li>
   <li>Na izbiro teme aplikacije in velikostjo pisave ura nima velikega vpliva.</li>
   <li>V splošnem je velika pisava bolj priljubljena kot manjša.</li>
+  <li>V splošnem so uporabnikom bolj všeč pogledi s slikami kot tisti brez.</li>
 </ul>
 
 V nadaljevanju bomo postopoma dodajali v končni model vse pomembnejše interakcije. Če bomo ob upoštevanju določene spremenljivke dosegali slabše rezultate, jih bomo izpustili. Pri tem si bomo pomagali s klicem funkcije `anova`. Končni model bomo analizirali in si pogledali njegovo učinkovitosti na podlagi k-fold testiranja in vrednosti kot so `f-measure`, `precision`, `recall` ter `accuracy`.
@@ -284,10 +293,10 @@ Za končni model bomo izbrali model `final.model.3`.
 Na podlagi spodnjega modela lahko pridemo do sledečih sklepov:
 <ul>
   <li> Še vedno velja dejstvo, da uporabniki dajejo slabše ocene med vožnjo, nekoliko boljše, ko hodijo in najboljše, ko so pri miru.</li>
-  <li> Manjša pisava v aplikaciji je manj priljubljena kot velika, saj je vrednost koeficienta `font.sizesmall-font` negativna in blizu nič, kar lahko sklepamo na podlagi p-vrednosti, ki znaša 0.840859.</li>
+  <li> Manjša pisava v aplikaciji je manj priljubljena kot velika, saj je vrednost koeficienta `font.sizesmall-font` negativna in blizu nič, kar lahko sklepamo na podlagi p-vrednosti, ki znaša 0.840859. Največje razlike se pokažejo, ko upoštevamo fizično aktivnost uporabnika.</li>
   <li> Svetla tema aplikacije je načeloma nekoliko slabša, a je tudi ta vrednost zelo majhna in blizu nič, kar lahko sklepamo na podlagi p-vrednosti koeficienta `themelight-theme`. Ne smemo pa zanemariti interakcij med temo aplikacije in svetlostjo okolice. Izkaže se namreč, da se z višanjem svetlosti okolice veča tudi priljubljenost svetle teme aplikacije, kar lahko sklepamo na podlagi vrednosti koeficientov `themelight-theme:env.brightnessL3` in `themelight-theme:env.brightnessL4`. </li>
-  <li> V splošnem dajejo uporabniki slabše ocene, ko se svetlost okolice višja, kar vidimo na podlagi negativnih vrednosti koeficientov, `env.brightnessL3` in `env.brightnessL4`. </li>
-  <li>V splošnem velja, da z višanjem nivoja baterije ocene uporabnikov padajo (negativna vrednost koeficienta `battery.level`).</li>
+  <li> V splošnem dajejo uporabniki slabše ocene, ko je svetlost okolice višja, kar vidimo na podlagi negativnih vrednosti koeficientov, `env.brightnessL3` in `env.brightnessL4`, a je to odvisno od izbire teme aplikacije. </li>
+  <li>V splošnem velja, da z višanjem nivoja baterije ocene uporabnikov padajo (negativna vrednost koeficienta `battery.level`), vendar pri temu ne smemo pozabiti na izbiro teme v aplikaciji.</li>
   <li>Ko uporabnik hodi, dobiva majhna pisava veliko slabše rezultate kot večja, vrednost koeficienta `user.activityON_FOOT:font.sizesmall-font` je negativna in znaša kar -1.901058. Med vožnjo in ko so uporabniki pri miru pa velikih razlik med majhno in veliko pisavo ni.</li>
   <li>Z višanjem nivoja baterije pa svetla tema aplikacije pridobiva boljše rezultate, kar lahko sklepamo na podlagi vrednosti koeficienta `themelight-theme:battery.level`, ki je pozitiven.</li>
 </ul>
