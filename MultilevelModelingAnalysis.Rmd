@@ -308,52 +308,50 @@ summary(final.model.3)
 #### Testiranje končnega modela
 S spodnjo funkcijo si bomo pomagali pri ocenjavanju kakovosti modela s pomočjo k-fold testiranja. Testiranje je izvedeno tako, da model napoveduje uporabnikovo oceno, ki je nato primerjana z določenjo vrednostjo, ki jo bomo v nadaljevanju uporabili za razlikovanje med dobrimi in slabimi pogledi. Vse vrednosti, ki so večje ali enake vrednosti oceni 3, se označijo kot pozitivne, v nasprotnem primeru pa kot negativne. S tem dosežemo binarizacijo napovedovanja razreda in jo bomo tudi uporabili pri gradnji in evaluaciji ostalih modelov.  
 ```{r}
-kFold <- function(k){
+kfold <- function(k){
   set.seed(0)
-  
+
+  shuffled_dataset <-df[sample(nrow(df)),] 
+
+  folds <- cut(seq(1,nrow(shuffled_dataset)),breaks=k,labels=FALSE)
   model_results <- c()
   dummy_results <- c()
-  
-  n_all <- nrow(df)
-  
   for(i in 1:k){
-    n_train <- 1 - 1/k
-    n_size <- ceiling(n_all*n_train)
-    train_ind <- sample(seq_len(nrow(df)), size = n_size)
-    train <- df[train_ind, ]
-    test <- df[-train_ind, ]
-
-    final.model.3 <- lmer(score ~ 1 + user.activity*font.size + theme*env.brightness + theme*battery.level + (1|str_lay_i), data=train)
-
-    counter <- 0
-    vecinski <- 0
-  
-    for(row in 1:nrow(test)){
-      prediction <- predict(final.model.3, test[row,])
-      if( (prediction >= 3 & test[row,]['score']>=3) || (prediction < 3 & test[row,]['score']<3) ) {
-        counter <- counter + 1
+      testIndexes <- which(folds==i,arr.ind=TRUE)
+      testData <- shuffled_dataset[testIndexes, ]
+      trainData <- shuffled_dataset[-testIndexes, ]
+      final.model.3 <- lmer(score ~ 1 + user.activity*font.size + theme*env.brightness + theme*battery.level + (1|str_lay_i), data=trainData)
+      
+      counter <- 0
+      vecinski <- 0
+    
+      for(row in 1:nrow(testData)){
+        prediction <- predict(final.model.3, testData[row,])
+        if( (prediction >= 3 & testData[row,]['score']>=3) || (prediction < 3 & testData[row,]['score']<3) ) {
+          counter <- counter + 1
+        }
+        
+        if(testData[row,]['score'] >= 3){
+          vecinski <- vecinski + 1
+        }
       }
       
-      if(test[row,]['score'] >= 3){
-        vecinski <- vecinski + 1
-      }
-    }
-    
-    acc_model <- counter/nrow(test)
-    acc_dummy <- vecinski/nrow(test)
-    
-    model_results <- c(model_results, acc_model)
-    dummy_results <- c(dummy_results, acc_dummy)
+      acc_model <- counter/nrow(testData)
+      acc_dummy <- vecinski/nrow(testData)
+      
+      model_results <- c(model_results, acc_model)
+      dummy_results <- c(dummy_results, acc_dummy)
+  
   }
   
   sprintf("Mean model accuracy = %.2f | Mean dummy model accuracy = %.2f", mean(model_results), mean(dummy_results))
-  
 }
 
 ```
-Na podlagi spodnjega klica lahko razberemo, da ima večnivojski model za 9% večjo natančnost pri napovedovanju uporabnikove ocene kot večinski klasifikator.
+Na podlagi spodnjega klica lahko razberemo, da ima večnivojski model v povprečju za 6% večjo natančnost pri napovedovanju uporabnikove ocene kot večinski klasifikator.
+
 ```{r}
-kFold(10)
+kfold(10)
 ```
 
 Standardne metrike, ki jih uporabljamo pri evaluaciji modelov so `Accuracy, Precision, Recall, F-measure`. Omenjene metrike lahko izračunamo s pomočjo spodnje funkcije:
@@ -424,9 +422,13 @@ evaluateModel <- function(){
   calcmetrics(TP_V, FP_V, FN_V, TN_V)  
 }
 ```
+
 Iz spodnjega izpisa lahko ugotovimo, da je novozgrajen model boljši, vendar je problem, da velikokrat napove negativen razred, čeprav je ta bil pozitiven (vrednost `recall` manjša). Izkaže pa se, da se modelu poveča natančnost (`accuracy` znaša 0.77). Prav tako pa model redkeje zgreši negativen razred, ko napove pozitiven izhod (mera `precision` je večja).
 
 V splošnem želimo maksimizirati obe vrednosti (`precision` in `recall`), zato uporabimo mero `f-measure`. V našem primeru vidimo, da smo dosegli manjši napredek, saj vrednost `f-measure` znaša 0.807882 medtem ko pri večinskem klasifikatorju 0.794224. To pomeni, da smo dosegli nekoliko boljše razmerje med vrednostima `recall` in `precision` v primerjavi z večinskim klasifikatorjem.
 ```{r}
 evaluateModel()
 ```
+
+
+
