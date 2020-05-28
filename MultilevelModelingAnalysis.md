@@ -1,4 +1,4 @@
-Večnivojsko Hiearhično Modeliranje
+Večnivojsko Hierarhično Modeliranje
 ================
 
 ``` r
